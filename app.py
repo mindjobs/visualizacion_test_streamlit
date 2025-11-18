@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -5,12 +6,33 @@ import plotly.express as px
 # ============================
 #   CARGA DE DATOS
 # ============================
+DATA_PATH = "data/owid-co2-data.csv"
+
+
 @st.cache_data
-def load_data():
-    df = pd.read_csv("data/owid-co2-data.csv")
+def load_data(path: str):
+    if not os.path.exists(path):
+        return None
+    df = pd.read_csv(path)
     return df
 
-df = load_data()
+
+df = load_data(DATA_PATH)
+if df is None:
+    st.title("Visualización Interactiva de Emisiones de CO₂")
+    st.error(
+        "No se encontró el archivo de datos `data/owid-co2-data.csv`."
+    )
+    st.write(
+        "Descarga el dataset desde Our World in Data y colócalo en la carpeta `data/`:\\n"
+        "`https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv`"
+    )
+    st.write("Opciones:")
+    st.markdown("- Crea la carpeta `data/` en el proyecto y descarga el CSV allí.")
+    st.markdown(
+        "- O ejecuta en tu terminal: `mkdir -p data && curl -L -o data/owid-co2-data.csv https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv`"
+    )
+    st.stop()
 
 # ============================
 #   TÍTULO
@@ -51,7 +73,7 @@ fig1 = px.bar(
     labels={"co2": "CO₂ (millones de toneladas)", "country": "País"}
 )
 
-st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(fig1, width='stretch')
 
 # ============================
 #   MÁS GRÁFICOS (ejemplo)
@@ -72,4 +94,4 @@ fig2 = px.line(
     color="country",
     title="Emisiones de CO₂ a lo largo del tiempo"
 )
-st.plotly_chart(fig2, use_container_width=True)
+st.plotly_chart(fig2, width='stretch')
